@@ -1,0 +1,57 @@
+11) Develop a search application in Django using AJAX that displays courses 
+enrolled by a student being searched.  
+ 
+views.py 
+def course_search_ajax(request):  
+    if request.method=="POST":  
+        cid=request.POST.get("cname")  
+        s=Student.objects.all()  
+        student_list=list()  
+        for student in s:  
+            if student.enrolment.filter(id=cid):  
+                student_list.append(student)  
+        if len(student_list)==0:  
+            return HttpResponse("<h1>No Students enrolled</h1>")  
+        return 
+render(request,"selected_students.html",{"student_list":student_list})  
+    else:  
+        courses=Course.objects.all()  
+        return render(request,"course_search_aj.html",{"courses":courses}) 
+ 
+course_search_aj.html 
+{% load static %} 
+<html> 
+    <body> 
+        <form method="POST" action=""> 
+            Courses 
+            {% csrf_token %} 
+            <select name="cname" id="cname"> 
+                {% for course in courses %} 
+                <option value="{{ course.id }}">{{ course.course_name 
+}}</option> 
+                {% endfor %} 
+            </select> 
+            <input type="button" value="Search" id="serbtn"> 
+            <span id="result"></span> 
+        </form> 
+    </body> 
+    <script src="{% static 'jquery.min.js' %}"></script> 
+    <script> 
+    $(document).ready(function(){ 
+        $("#serbtn").click(function(){ 
+            var cname = $("#cname").val(); 
+            $.ajax({ 
+                url: "/course_search/", 
+                type: "POST", 
+                data: { cname: cname, csrfmiddlewaretoken: "{{ csrf_token }}"}, 
+                success: function(response){$("#result").html(response);} 
+            }); 
+}); 
+}); 
+</script> 
+</html> 
+urls.py 
+from ap3.views import regaj, course_search_ajax 
+urlpatterns = [ 
+path('course_seacrh_ajax/',course_search_ajax), 
+]

@@ -1,0 +1,217 @@
+5) Develop a Django app that performs student registration 
+to a course. It should also display list of students registered 
+for any selected course. Create students and course as 
+models with enrolment as ManyToMany field.  
+WAMP Server link 
+https://sourceforge.net/projects/wampserver/files/latest/downlo
+ ad 
+During installation process, many files will be missing and system 
+asks to install it. Hence download the files from this website: 
+https://wampserver.aviatechno.net/ 
+After successful installation of WAMP server, start it and then go to 
+http://localhost/phpmyadmin 
+Usename: root 
+Password- empty 
+Use phpMyAdmin 
+Create a new database “studentreg” 
+PS D:\SirMVIT\MY_SUBJECTS\FullStackDevelopment> python 
+manage.py startapp ap3 
+Install mysqlclient from VS Code terminal:  
+pip install mysqlclient 
+static and template folder creation and 3 files inside this folder 
+  
+course_search.html 
+<html>  
+    <body>  
+        <form method="POST" action="">  
+            Courses  
+            {% csrf_token %}  
+            <select name="cname">  
+                {%for course in courses %}  
+                <option value="{{course.id}}">{{course.course_name}}</option>  
+                {% endfor %}  
+            </select>  
+            <input type="submit" value="Search">  
+        </form>  
+    </body>  
+</html> 
+ 
+reg.html 
+<html> 
+    <body>  
+        <form method="post" action="">  
+            {% csrf_token %}  
+            Student Name  
+            <select name="sname">  
+            {%for student in students %}  
+            <option value="{{student.id}}">{{student.student_name}}</option>  
+            {% endfor %}  
+            </select><br>  
+            Course Name  
+            <select name="cname">  
+            {%for course in courses %}  
+            <option value="{{course.id}}">{{course.course_name}}</option>  
+            {% endfor %}  
+            </select><br>  
+            <input type="submit" value="Enroll">  
+        </form>  
+    </body>  
+</html> 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+selected_student.html 
+<html>  
+    <body>  
+        <table border>  
+            <tr>  
+                <th>Student Name</th>  
+                <th>Student USN</th>  
+                <th>Sem</th>  
+            </tr>  
+            {% for student in student_list %}  
+            <tr>  
+                <td>{{student.student_name}}</td>  
+                <td>{{student.student_usn}}</td>  
+                <td>{{student.student_sem}}</td>  
+            </tr>  
+            {% endfor %}  
+        </table>  
+    </body>  
+</html> 
+ 
+models.py 
+from django.db import models 
+ 
+# Create your models here. 
+class Course(models.Model): 
+    course_code=models.CharField(max_length=40)  
+    course_name=models.CharField(max_length=100)  
+    course_credits=models.IntegerField()  
+ 
+class Student(models.Model):  
+    student_usn=models.CharField(max_length=20)  
+    student_name=models.CharField(max_length=100)  
+    student_sem=models.IntegerField()  
+    enrolment=models.ManyToManyField(Course) 
+ 
+views.py 
+from django.http import HttpResponse  
+from django.shortcuts import render 
+ 
+from ap3.models import Course, Student 
+ 
+# Create your views here. 
+def reg(request):  
+    if request.method == "POST":  
+        sid=request.POST.get("sname")  
+        cid=request.POST.get("cname")  
+        student=Student.objects.get(id=sid)  
+        course=Course.objects.get(id=cid)  
+        res=student.enrolment.filter(id=cid)  
+        if res:  
+            return HttpResponse("<h1>Student already enrolled</h1>")  
+        student.enrolment.add(course)  
+        return HttpResponse("<h1>Student enrolled successfully</h1>")  
+    else:  
+        students=Student.objects.all()  
+        courses=Course.objects.all() 
+        return render(request,"reg.html",{"students":students, 
+"courses":courses}) 
+ 
+def course_search(request):  
+    if request.method=="POST": 
+        cid=request.POST.get("cname")  
+        s=Student.objects.all()  
+        student_list=list()  
+        for student in s:  
+            if student.enrolment.filter(id=cid):  
+                student_list.append(student)  
+        if len(student_list)==0:  
+            return HttpResponse("<h1>No Students enrolled</h1>") 
+        return 
+render(request,"selected_student.html",{"student_list":student_list}) 
+    else:  
+        courses=Course.objects.all()  
+        return render(request,"course_search.html",{"courses":courses}) 
+ 
+ 
+ 
+ 
+ 
+urls.py 
+from ap3.views import reg, course_search 
+ 
+urlpatterns = [ 
+    path('admin/', admin.site.urls), 
+    path('cdt/', current_date_time ), 
+    path('fhrsa/',four_hours_ahead), 
+    path('fhrsb/',four_hours_before), 
+    path('showlist/', showlist), 
+    path('aboutus/', aboutus), 
+    path('home/', home), 
+    path('contactus/', contactus), 
+    path('reg/', reg), 
+    path('course_search/',course_search), 
+] 
+settings.py 
+INSTALLED_APPS = [ 
+    'django.contrib.admin', 
+    'django.contrib.auth', 
+    'django.contrib.contenttypes', 
+    'django.contrib.sessions', 
+    'django.contrib.messages', 
+    'django.contrib.staticfiles', 
+    'ap3' 
+] 
+ 
+TEMPLATES = [ 
+    { 
+        'BACKEND': 'django.template.backends.django.DjangoTemplates', 
+        'DIRS': [os.path.join(BASE_DIR,'ap3/templates'),], 
+        'APP_DIRS': True, 
+        'OPTIONS': { 
+            'context_processors': [ 
+                'django.template.context_processors.debug', 
+                'django.template.context_processors.request', 
+                'django.contrib.auth.context_processors.auth', 
+                'django.contrib.messages.context_processors.messages', 
+            ], 
+        }, 
+    }, 
+] 
+ 
+ 
+ 
+ 
+ 
+DATABASES = { 
+'default': { 
+'ENGINE': 'django.db.backends.mysql', 
+'NAME': 'studentreg', 
+'USER': 'root', 
+'PASSWORD': '', 
+'HOST':'localhost', 
+'PORT':'3306', 
+} 
+} 
+STATIC_URL = 'static/' 
+STATICFILES_DIRS=[os.path.join(BASE_DIR, 'ap3/static')] 
+Perform Migrations 
+python manage.py makemigrations ap3 
+python manage.py migrate 
+python manage.py runserver 
+Note: migration should be done every time as models.py change or any 
+database table changes. 
+Insert into tables in phpmyadmin  
+http://localhost/phpmyadmin 
+OR 
+http://localhost/phpmyadmin/index.php?route=/sql&pos=0&db=s
+ tudentreg&table=ap3_course 
+http://localhost/phpmyadmin/index.php?route=/sql&pos=0&db=s
+ tudentreg&table=ap3_student 
+ap3_student and ap3_course 

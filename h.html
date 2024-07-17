@@ -1,0 +1,54 @@
+8) For students enrolment developed in Module 2, create a generic class view 
+which displays list of students and detailview that displays student details for any 
+selected student in the list.  
+views.py 
+from django.views import generic 
+ 
+class StudentListView(generic.ListView):  
+    model=Student  
+    template_name="student_list.html"  
+ 
+class StudentDetailView(generic.DetailView):  
+    model=Student  
+    template_name="student_detail.html" 
+ 
+ 
+ 
+student_list.html 
+<html>  
+    <body>  
+        {% if student_list %}  
+        <table border>  
+            <tr>  
+                <th>USN</th>  
+                <th>Courses Enrolled</th>  
+            </tr>  
+            {% for student in student_list %}  
+            <tr> 
+                <td><a href="/student_detail/{{student.pk}}">{{ 
+student.student_usn }}</a></td>  
+                <td>{% for course in student.enrolment.all %}  
+                    <span>{{ course.course_name }}</span>  
+                    {% endfor %}  
+                </td> 
+            </tr>  
+            {% endfor %}  
+        </table>  
+        {% else %}  
+            <h1>No Students Enrolled</h1>  
+        {% endif %}  
+    </body>  
+</html> 
+ 
+ 
+student_detail.html 
+<h1>Student Name: {{ student.student_name }}</h1>  
+<h1>Student USN: {{ student.student_usn }}</h1>  
+<h1>Student Sem: {{ student.student_sem }}</h1> 
+urls.py 
+from ap3.views import StudentListView,StudentDetailView 
+urlpatterns = [ 
+path('add_project/', add_project), 
+path('student_list/', StudentListView.as_view()),  
+path('student_detail/<int:pk>/', StudentDetailView.as_view()), 
+] 

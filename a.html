@@ -1,0 +1,19 @@
+1) Develop a Django app that displays current date and time in 
+server  
+views.py 
+import datetime 
+from django.http import HttpResponse 
+from django.shortcuts import render 
+# Create your views here. 
+def current_date_time(request): 
+now=datetime.datetime.now() 
+result="<html><body><h1>Current Date and time is %s" %(now) 
+return HttpResponse(result) 
+urls.py 
+from django.contrib import admin 
+from django.urls import path 
+from ap1.views import current_date_time,four_hours_ahead,four_hours_before 
+from ap2.views import showlist 
+urlpatterns = [ 
+path('admin/', admin.site.urls), 
+path('cdt/', current_date_time ),

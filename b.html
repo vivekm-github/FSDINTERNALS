@@ -1,0 +1,47 @@
+2) Develop a Django app that displays date and time four hours 
+ahead and four hours before as an offset of current date and time 
+in server. 
+Views.py 
+import datetime 
+from django.http import HttpResponse 
+from django.shortcuts import render 
+ 
+# Create your views here. 
+def current_date_time(request): 
+    now=datetime.datetime.now() 
+    result="<html><body><h1>Current Date and time 
+is %s" %(now) 
+    return HttpResponse(result) 
+ 
+def four_hours_ahead(request): 
+     dt = datetime.datetime.now() + 
+datetime.timedelta(hours=4)  
+     html = "<html><body><h1>After 4hour(s), it 
+will be %s.</h1>"% (dt,)  
+     return HttpResponse(html)  
+ 
+def four_hours_before(request): 
+     dt = datetime.datetime.now() + 
+datetime.timedelta(hours=-4) 
+     html = "<html><body><h1>Before 4 hour(s), it 
+was %s.</h1>"% (dt,)  
+     return HttpResponse(html) 
+ 
+ 
+ 
+ 
+ 
+ 
+urls.py 
+from django.contrib import admin 
+from django.urls import path 
+from ap1.views import 
+current_date_time,four_hours_ahead,four_hours_befor
+ e 
+ 
+urlpatterns = [ 
+    path('admin/', admin.site.urls), 
+    path('cdt/', current_date_time ),y 
+    path('fhrsa/',four_hours_ahead), 
+    path('fhrsb/',four_hours_before), 
+] 

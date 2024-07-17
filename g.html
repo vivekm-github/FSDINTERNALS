@@ -1,0 +1,70 @@
+7) Develop a Model form for student that contains his topic chosen for project, 
+languages used and duration with a model called project.  
+models.py 
+from Django.db import models 
+from django.forms import ModelForm 
+  
+class Project(models.Model): 
+    student=models.ForeignKey(Student,on_delete=models.CASCADE)  
+    ptopic=models.CharField(max_length=200)  
+    plangauges=models.CharField(max_length=200)  
+    pduration=models.IntegerField()  
+ 
+class ProjectReg(ModelForm): 
+    required_css_class="required"  
+    class Meta:  
+        model=Project  
+        fields=['student','ptopic','plangauges','pduration'] 
+ 
+views.py 
+from ap3.models import Course, Student, ProjectReg 
+ 
+def add_project(request):  
+    if request.method=="POST":  
+        form=ProjectReg(request.POST)  
+        if form.is_valid():  
+            form.save()  
+            return HttpResponse("<h1>Record inserted successfully</h1>")  
+        else:  
+            return HttpResponse("<h1>Record not inserted</h1>")  
+    else:  
+        form=ProjectReg()  
+        return render(request,"add_project.html",{"form":form}) 
+ 
+add_project.html (need to be created in templates folder) 
+<html>  
+    <form method="post" action="">  
+        {% csrf_token %}  
+        <table>  
+            {{ form.as_table}}  
+            <tr>  
+                <td>  
+                    <input type="submit" value="Submit">  
+                </td> 
+            </tr> 
+        </table> 
+    </form>  
+</html>  
+ 
+urls.py 
+from ap3.views import reg, course_search, add_project 
+ 
+urlpatterns = [ 
+    path('admin/', admin.site.urls), 
+    path('cdt/', current_date_time ), 
+    path('fhrsa/',four_hours_ahead), 
+    path('fhrsb/',four_hours_before), 
+    path('showlist/', showlist), 
+    path('aboutus/', aboutus), 
+    path('home/', home), 
+    path('contactus/', contactus), 
+    path('reg/', reg), 
+    path('course_search/',course_search), 
+    path('add_project/', add_project) 
+] 
+ 
+Perform remigrations before running:  
+python manage.py makemigrations ap3  
+python manage.py migrate  
+ 
+python manage.py runserver 
